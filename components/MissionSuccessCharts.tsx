@@ -8,11 +8,7 @@ interface MissionSuccessChartsProps {
 }
 
 export const MissionSuccessCharts: React.FC<MissionSuccessChartsProps> = ({ data }) => {
-  const [mounted, setMounted] = useState(false);
-
-  useEffect(() => {
-    setMounted(true);
-  }, []);
+  const [mounted] = useState(true);
 
   if (!mounted) {
     return <div className="h-48 flex items-center justify-center text-xs text-slate-500 font-mono">Loading analytics...</div>;
