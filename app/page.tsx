@@ -56,7 +56,6 @@ export default function HomePage() {
 
   const isStreamingRef = useRef(isStreaming);
   const isHandsFreeRef = useRef(isHandsFree);
-  const hasWelcomedRef = useRef(false);
   const sendMessageRef = useRef<(text: string, speakResponse?: boolean) => void>(() => {});
 
   useEffect(() => {
@@ -66,17 +65,6 @@ export default function HomePage() {
   useEffect(() => {
     isHandsFreeRef.current = isHandsFree;
   }, [isHandsFree]);
-
-  useEffect(() => {
-    if (hasWelcomedRef.current) return;
-    hasWelcomedRef.current = true;
-    // Auto-trigger welcoming audio greeting when app first launches based on current cognitive level
-    const timer = setTimeout(() => {
-      const welcomeText = `Welcome to Autonomous Self-Growing Edge Agent. Cognitive engine is online at Level ${growthStats.level}. All LiteRT models and offline voice synthesis are fully operational.`;
-      realTimeAudioController.speakText(welcomeText);
-    }, 1200);
-    return () => clearTimeout(timer);
-  }, [growthStats.level]);
 
   const handleSendMessage = React.useCallback(async (text: string, speakResponse: boolean = false) => {
     if (!text.trim() || isStreamingRef.current) return;
@@ -234,9 +222,24 @@ export default function HomePage() {
       {/* Mobile App Header Bar */}
       <header className="px-3.5 py-2 bg-[#090e1a]/95 border-b border-slate-800/80 flex items-center justify-between z-30 select-none">
         <div className="flex items-center gap-2">
-          <div className="w-7 h-7 rounded-lg bg-gradient-to-tr from-cyan-500/20 to-emerald-500/20 border border-cyan-500/40 flex items-center justify-center text-cyan-400">
-            <Cpu className="w-4 h-4 animate-pulse" />
-          </div>
+          {(() => {
+            const cognitiveState = isStreaming ? 'reasoning' : voiceState === 'speaking' ? 'speaking' : telemetry.activeSkill ? 'learning' : 'idle';
+            const glowClass = {
+              idle: 'border-cyan-500/50 bg-gradient-to-tr from-cyan-500/20 to-sky-500/20 text-cyan-400 shadow-[0_0_12px_rgba(6,182,212,0.4)]',
+              reasoning: 'border-purple-500/80 bg-gradient-to-tr from-purple-500/35 to-indigo-500/35 text-purple-300 shadow-[0_0_20px_rgba(168,85,247,0.7)] animate-pulse',
+              learning: 'border-emerald-500/80 bg-gradient-to-tr from-emerald-500/35 to-teal-500/35 text-emerald-300 shadow-[0_0_20px_rgba(16,185,129,0.7)] animate-pulse',
+              speaking: 'border-amber-500/80 bg-gradient-to-tr from-amber-500/35 to-orange-500/35 text-amber-300 shadow-[0_0_20px_rgba(245,158,11,0.7)] animate-pulse',
+            }[cognitiveState];
+
+            return (
+              <div 
+                className={`w-7 h-7 rounded-lg border flex items-center justify-center transition-all duration-500 ${glowClass}`}
+                title={`Cognitive State: ${cognitiveState.toUpperCase()}`}
+              >
+                <Cpu className="w-4 h-4" />
+              </div>
+            );
+          })()}
           <div>
             <div className="flex items-center gap-1.5">
               <h1 className="text-xs font-semibold text-slate-100 tracking-tight leading-tight">
@@ -246,9 +249,17 @@ export default function HomePage() {
                 Lv.{growthStats.level}
               </span>
             </div>
-            <span className="text-[10px] text-emerald-400 font-mono block leading-none">
-              100% Offline Air-Gap
-            </span>
+            <div className="mt-1 flex items-center gap-1.5">
+              <span className="text-[10px] text-emerald-400 font-mono">
+                XP: {growthStats.xp}/{growthStats.xpToNextLevel}
+              </span>
+              <div className="w-16 h-1.5 bg-slate-800 rounded-full overflow-hidden">
+                <div 
+                  className="h-full bg-gradient-to-r from-cyan-500 to-emerald-400 rounded-full transition-all duration-500" 
+                  style={{ width: `${Math.min(100, Math.max(5, (growthStats.xp / growthStats.xpToNextLevel) * 100))}%` }}
+                />
+              </div>
+            </div>
           </div>
         </div>
 

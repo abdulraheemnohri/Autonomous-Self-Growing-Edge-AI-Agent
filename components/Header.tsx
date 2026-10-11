@@ -18,6 +18,8 @@ interface HeaderProps {
   onToggleForceOffline: () => void;
   isHandsFree: boolean;
   onToggleHandsFree: () => void;
+  isStreaming?: boolean;
+  voiceState?: string;
 }
 
 export const Header: React.FC<HeaderProps> = ({
@@ -30,16 +32,29 @@ export const Header: React.FC<HeaderProps> = ({
   isForceOffline,
   onToggleForceOffline,
   isHandsFree,
-  onToggleHandsFree
+  onToggleHandsFree,
+  isStreaming = false,
+  voiceState = 'idle'
 }) => {
+  const cognitiveState = isStreaming ? 'reasoning' : voiceState === 'speaking' ? 'speaking' : telemetry.activeSkill ? 'learning' : 'idle';
+  const glowClass = {
+    idle: 'border-cyan-500/50 bg-gradient-to-tr from-cyan-500/20 to-sky-500/20 text-cyan-400 shadow-[0_0_15px_rgba(6,182,212,0.4)]',
+    reasoning: 'border-purple-500/80 bg-gradient-to-tr from-purple-500/35 to-indigo-500/35 text-purple-300 shadow-[0_0_24px_rgba(168,85,247,0.7)] animate-pulse',
+    learning: 'border-emerald-500/80 bg-gradient-to-tr from-emerald-500/35 to-teal-500/35 text-emerald-300 shadow-[0_0_24px_rgba(16,185,129,0.7)] animate-pulse',
+    speaking: 'border-amber-500/80 bg-gradient-to-tr from-amber-500/35 to-orange-500/35 text-amber-300 shadow-[0_0_24px_rgba(245,158,11,0.7)] animate-pulse',
+  }[cognitiveState];
+
   return (
     <header className="border-b border-slate-800/80 bg-[#0b101b]/95 backdrop-blur-md sticky top-0 z-50">
       {/* Top Bar: Brand, Hardware Badges, Model Selector */}
       <div className="max-w-7xl mx-auto px-4 py-2.5 flex flex-wrap items-center justify-between gap-3">
         {/* Brand & Identity */}
         <div className="flex items-center gap-3">
-          <div className="w-9 h-9 rounded-lg bg-gradient-to-tr from-cyan-500/20 to-emerald-600/30 border border-cyan-500/40 flex items-center justify-center text-cyan-400 shadow-sm shadow-cyan-950">
-            <Cpu className="w-5 h-5 animate-pulse" />
+          <div 
+            className={`w-9 h-9 rounded-lg border flex items-center justify-center transition-all duration-500 ${glowClass}`}
+            title={`Cognitive State: ${cognitiveState.toUpperCase()}`}
+          >
+            <Cpu className="w-5 h-5" />
           </div>
           <div>
             <div className="flex items-center gap-2">
@@ -153,7 +168,7 @@ export const Header: React.FC<HeaderProps> = ({
             </span>
             <span className="text-slate-700">·</span>
             <span>
-              Growth: <strong className="text-emerald-400">Lv.{telemetry.growthLevel}</strong> {telemetry.activeSkill ? `(${telemetry.activeSkill})` : ''}
+              Growth: <strong className="text-emerald-400">Lv.{telemetry.growthLevel}</strong> {telemetry.growthXp !== undefined ? `(XP: ${telemetry.growthXp})` : ''} {telemetry.activeSkill ? `(${telemetry.activeSkill})` : ''}
             </span>
           </div>
         </div>
