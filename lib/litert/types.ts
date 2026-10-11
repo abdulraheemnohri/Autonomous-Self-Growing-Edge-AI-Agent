@@ -226,7 +226,7 @@ export interface HuggingFaceModelItem {
   author: string;
   downloads: string;
   likes: string;
-  format: 'LiteRT' | 'GGUF' | 'ONNX' | 'WebGPU';
+  format: 'LiteRT' | 'LiteRT-LM' | 'GGUF' | 'ONNX' | 'WebGPU';
   quantization: string;
   fileSizeMb: number;
   downloadStatus: 'not_downloaded' | 'downloading' | 'cached_offline' | 'active';

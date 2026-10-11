@@ -12,6 +12,8 @@ import { ChatConsole } from '../components/ChatConsole';
 import { AutonomousAgentPanel } from '../components/AutonomousAgentPanel';
 import { VectorDbStudio } from '../components/VectorDbStudio';
 import { PerformanceStudio } from '../components/PerformanceStudio';
+import { DailyCognitiveSummaryModal } from '../components/DailyCognitiveSummaryModal';
+import { CognitiveMilestoneModal } from '../components/CognitiveMilestoneModal';
 import { liteRTEngine } from '../lib/litert/engine';
 import { realTimeAudioController, VoiceAgentState } from '../lib/voice/audio-controller';
 import { growthEngine } from '../lib/learning/growth-engine';
@@ -53,6 +55,30 @@ export default function HomePage() {
   const [activeModel, setActiveModel] = useState(liteRTEngine.getActiveModel());
   const [frameMode, setFrameMode] = useState<'mobile_bezel' | 'responsive'>('responsive');
   const [growthStats, setGrowthStats] = useState(growthEngine.getStats());
+  const [showDailySummaryModal, setShowDailySummaryModal] = useState(false);
+  const [showMilestoneModal, setShowMilestoneModal] = useState(false);
+
+  useEffect(() => {
+    // Auto-trigger daily summary modal when XP hits threshold (e.g., >= 380)
+    if (growthStats.xp >= 380 && typeof window !== 'undefined' && !sessionStorage.getItem('daily_summary_triggered')) {
+      const timer = setTimeout(() => {
+        setShowDailySummaryModal(true);
+        sessionStorage.setItem('daily_summary_triggered', 'true');
+      }, 100);
+      return () => clearTimeout(timer);
+    }
+  }, [growthStats.xp]);
+
+  useEffect(() => {
+    // Auto-trigger milestone celebration when level reaches significant threshold (e.g. 5, 10, 25, 50)
+    if ([5, 10, 25, 50].includes(growthStats.level) && typeof window !== 'undefined' && !sessionStorage.getItem(`milestone_triggered_${growthStats.level}`)) {
+      const timer = setTimeout(() => {
+        setShowMilestoneModal(true);
+        sessionStorage.setItem(`milestone_triggered_${growthStats.level}`, 'true');
+      }, 200);
+      return () => clearTimeout(timer);
+    }
+  }, [growthStats.level]);
 
   const isStreamingRef = useRef(isStreaming);
   const isHandsFreeRef = useRef(isHandsFree);
@@ -240,12 +266,20 @@ export default function HomePage() {
               </div>
             );
           })()}
-          <div>
+          <div 
+            onClick={() => setShowDailySummaryModal(true)}
+            className="cursor-pointer group"
+            title="Click to view Daily Cognitive Summary"
+          >
             <div className="flex items-center gap-1.5">
-              <h1 className="text-xs font-semibold text-slate-100 tracking-tight leading-tight">
+              <h1 className="text-xs font-semibold text-slate-100 tracking-tight leading-tight group-hover:text-cyan-300 transition-colors">
                 LiteRT Agent
               </h1>
-              <span className="px-1.5 py-0.2 rounded text-[9px] bg-cyan-950 text-cyan-300 border border-cyan-800 font-mono font-bold">
+              <span 
+                onClick={(e) => { e.stopPropagation(); setShowMilestoneModal(true); }}
+                className="px-1.5 py-0.2 rounded text-[9px] bg-cyan-950 text-cyan-300 border border-cyan-800 font-mono font-bold cursor-pointer hover:bg-cyan-900 transition-colors"
+                title="Click to view Cognitive Milestone celebration"
+              >
                 Lv.{growthStats.level}
               </span>
             </div>
@@ -391,6 +425,21 @@ export default function HomePage() {
 
       {/* Mobile Native Bottom Navigation Bar */}
       <MobileBottomNav activeTab={activeTab} onChangeTab={setActiveTab} />
+
+      {/* Daily Cognitive Summary Modal */}
+      <DailyCognitiveSummaryModal
+        isOpen={showDailySummaryModal}
+        onClose={() => setShowDailySummaryModal(false)}
+        stats={growthStats}
+      />
+
+      {/* Cognitive Milestone Celebration Modal */}
+      <CognitiveMilestoneModal
+        isOpen={showMilestoneModal}
+        onClose={() => setShowMilestoneModal(false)}
+        level={growthStats.level}
+        title={growthStats.title}
+      />
     </MobileFrame>
   );
 }
