@@ -1,0 +1,6 @@
+{
+  "name": "LiteRT Autonomous Edge Agent",
+  "description": "An offline-first autonomous AI agent powered by on-device LiteRT-LM runtime, featuring local self-learning memory, ReAct goal execution, and real-time bidirectional voice chat.",
+  "requestFramePermissions": ["microphone"],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
