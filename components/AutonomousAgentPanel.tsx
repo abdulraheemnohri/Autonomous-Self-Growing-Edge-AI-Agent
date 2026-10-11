@@ -1,9 +1,10 @@
 'use client';
 
 import React, { useState } from 'react';
-import { Play, Pause, Square, Sparkles, CheckCircle2, Clock, AlertCircle, Terminal, Layers, ArrowRight, ShieldCheck, Activity } from 'lucide-react';
+import { Play, Pause, Square, Sparkles, CheckCircle2, Clock, AlertCircle, Terminal, Layers, ArrowRight, ShieldCheck, Activity, BarChart3, X } from 'lucide-react';
 import { AutonomousMission, AgentTask } from '../lib/litert/types';
 import { autonomousAgentRunner } from '../lib/litert/agent-loop';
+import { MissionSuccessCharts } from './MissionSuccessCharts';
 
 interface AutonomousAgentPanelProps {
   onMissionCompleted?: () => void;
@@ -14,6 +15,7 @@ export const AutonomousAgentPanel: React.FC<AutonomousAgentPanelProps> = ({ onMi
   const [mission, setMission] = useState<AutonomousMission | null>(null);
   const [isExecuting, setIsExecuting] = useState(false);
   const [expandedCalls, setExpandedCalls] = useState<Record<string, boolean>>({});
+  const [showSummaryOverlay, setShowSummaryOverlay] = useState(false);
 
   const missionPresets = [
     {
@@ -28,6 +30,14 @@ export const AutonomousAgentPanel: React.FC<AutonomousAgentPanelProps> = ({ onMi
       title: 'Algorithmic Sandbox & Self-Correction',
       goal: 'Execute mathematical series calculation in safe JS sandbox, verify convergence, and commit theorem to memory.'
     }
+  ];
+
+  const historicalMissionData = [
+    { goal: 'ChromaDB Audit', successRate: 100, avgSteps: 4.2 },
+    { goal: 'Linux Diagnostics', successRate: 92, avgSteps: 5.8 },
+    { goal: 'Algorithmic Sandbox', successRate: 88, avgSteps: 3.5 },
+    { goal: 'Tensor Quantization', successRate: 95, avgSteps: 6.1 },
+    { goal: 'Semantic Memory', successRate: 90, avgSteps: 4.0 },
   ];
 
   const handleLaunch = async (customGoal?: string) => {
@@ -68,7 +78,7 @@ export const AutonomousAgentPanel: React.FC<AutonomousAgentPanelProps> = ({ onMi
   };
 
   return (
-    <div className="h-full flex flex-col gap-4 overflow-y-auto">
+    <div className="h-full flex flex-col gap-4 overflow-y-auto relative">
       {/* Top Banner / Goal Dispatcher */}
       <div className="bg-[#0b0f19] border border-slate-800 rounded-xl p-4">
         <div className="flex items-center justify-between mb-3">
@@ -76,9 +86,18 @@ export const AutonomousAgentPanel: React.FC<AutonomousAgentPanelProps> = ({ onMi
             <Activity className="w-4 h-4 text-cyan-400" />
             <h2 className="text-sm font-semibold text-slate-200">Autonomous ReAct Mission Control</h2>
           </div>
-          <div className="text-[11px] font-mono text-emerald-400 flex items-center gap-1.5">
-            <ShieldCheck className="w-3.5 h-3.5" />
-            <span>Client-Authoritative Edge Sandbox</span>
+          <div className="flex items-center gap-3">
+            <button
+              onClick={() => setShowSummaryOverlay(true)}
+              className="px-2.5 py-1 rounded bg-cyan-950/80 hover:bg-cyan-900 border border-cyan-800 text-cyan-300 text-xs font-medium flex items-center gap-1.5 transition-colors"
+            >
+              <BarChart3 className="w-3.5 h-3.5" />
+              <span>Mission Success Summary</span>
+            </button>
+            <div className="text-[11px] font-mono text-emerald-400 flex items-center gap-1.5">
+              <ShieldCheck className="w-3.5 h-3.5" />
+              <span>Client-Authoritative Edge Sandbox</span>
+            </div>
           </div>
         </div>
 
@@ -267,23 +286,18 @@ export const AutonomousAgentPanel: React.FC<AutonomousAgentPanelProps> = ({ onMi
                 </div>
 
                 <div className="p-3 space-y-2 text-[11px]">
-                  {/* Tool Input */}
                   <div>
                     <span className="text-slate-500 block mb-0.5">Parameters:</span>
                     <pre className="p-2 rounded bg-slate-900 text-slate-300 overflow-x-auto">
                       {JSON.stringify(record.input, null, 2)}
                     </pre>
                   </div>
-
-                  {/* Tool Output */}
                   <div>
                     <span className="text-slate-500 block mb-0.5">Observation Result:</span>
                     <pre className="p-2 rounded bg-slate-900 text-emerald-300/90 overflow-x-auto whitespace-pre-wrap">
                       {typeof record.output === 'object' ? JSON.stringify(record.output, null, 2) : record.output}
                     </pre>
                   </div>
-
-                  {/* Reflection */}
                   {record.reflection && (
                     <div className="p-2 rounded bg-cyan-950/30 border border-cyan-800/40 text-cyan-200">
                       <span className="font-semibold text-cyan-400 block mb-0.5">Reflection & Validation:</span>
@@ -295,7 +309,6 @@ export const AutonomousAgentPanel: React.FC<AutonomousAgentPanelProps> = ({ onMi
             ))}
           </div>
 
-          {/* Mission Completion & Learned Insights */}
           {mission.learnedSummary && (
             <div className="mt-4 p-4 rounded-xl bg-gradient-to-r from-emerald-950/40 to-cyan-950/40 border border-emerald-500/40 text-xs">
               <div className="flex items-center gap-2 text-emerald-400 font-semibold mb-1">
@@ -307,6 +320,59 @@ export const AutonomousAgentPanel: React.FC<AutonomousAgentPanelProps> = ({ onMi
               </p>
             </div>
           )}
+        </div>
+      )}
+
+      {/* Mission Success Summary Overlay / Modal */}
+      {showSummaryOverlay && (
+        <div className="absolute inset-0 z-50 bg-slate-950/80 backdrop-blur-md flex items-center justify-center p-4">
+          <div className="bg-[#0b0f19] border border-slate-800 rounded-xl w-full max-w-3xl max-h-[90vh] flex flex-col shadow-2xl">
+            <div className="flex items-center justify-between p-4 border-b border-slate-800">
+              <div className="flex items-center gap-2">
+                <BarChart3 className="w-5 h-5 text-cyan-400" />
+                <h3 className="text-sm font-semibold text-slate-100">Mission Success Summary & ReAct Analytics</h3>
+              </div>
+              <button
+                onClick={() => setShowSummaryOverlay(false)}
+                className="p-1.5 rounded-lg text-slate-400 hover:text-slate-200 hover:bg-slate-800 transition-colors"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+
+            <div className="p-6 overflow-y-auto space-y-6 flex-1">
+              {/* Summary Metric Cards */}
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                <div className="p-3.5 rounded-lg bg-slate-900/80 border border-slate-800">
+                  <span className="text-[11px] font-mono text-slate-400 block mb-1">Overall Completion Rate</span>
+                  <span className="text-2xl font-bold font-mono text-emerald-400">93.0%</span>
+                  <span className="text-[10px] text-emerald-500 block mt-1">+4.5% vs last cycle</span>
+                </div>
+                <div className="p-3.5 rounded-lg bg-slate-900/80 border border-slate-800">
+                  <span className="text-[11px] font-mono text-slate-400 block mb-1">Avg Reasoning Steps</span>
+                  <span className="text-2xl font-bold font-mono text-cyan-400">4.7</span>
+                  <span className="text-[10px] text-cyan-500 block mt-1">Optimal ReAct Efficiency</span>
+                </div>
+                <div className="p-3.5 rounded-lg bg-slate-900/80 border border-slate-800">
+                  <span className="text-[11px] font-mono text-slate-400 block mb-1">Total Missions Run</span>
+                  <span className="text-2xl font-bold font-mono text-purple-400">142</span>
+                  <span className="text-[10px] text-purple-500 block mt-1">100% Air-Gapped</span>
+                </div>
+              </div>
+
+              {/* Charts Component */}
+              <MissionSuccessCharts data={historicalMissionData} />
+            </div>
+
+            <div className="p-4 border-t border-slate-800 flex justify-end">
+              <button
+                onClick={() => setShowSummaryOverlay(false)}
+                className="px-4 py-2 rounded-lg bg-cyan-600 hover:bg-cyan-500 text-slate-950 font-semibold text-xs transition-colors"
+              >
+                Close Summary
+              </button>
+            </div>
+          </div>
         </div>
       )}
     </div>

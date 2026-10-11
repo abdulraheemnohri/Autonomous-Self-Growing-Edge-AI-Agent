@@ -21,8 +21,8 @@ curl -fsSL https://deb.nodesource.com/setup_20.x | sudo -E bash -
 sudo apt install -y nodejs
 
 # 3. Clone and setup repository
-git clone https://github.com/litert-community/autonomous-edge-agent.git
-cd autonomous-edge-agent
+git clone https://github.com/abdulraheemnohri/Autonomous-Self-Growing-Edge-AI-Agent.git
+cd Autonomous-Self-Growing-Edge-AI-Agent
 npm install
 
 # 4. Build and start production server
@@ -36,8 +36,8 @@ npm start
 sudo pacman -Syu --noconfirm nodejs npm git base-devel cmake python
 
 # 2. Clone repository & install packages
-git clone https://github.com/litert-community/autonomous-edge-agent.git
-cd autonomous-edge-agent
+git clone https://github.com/abdulraheemnohri/Autonomous-Self-Growing-Edge-AI-Agent.git
+cd Autonomous-Self-Growing-Edge-AI-Agent
 npm install
 
 # 3. Build & Run
@@ -51,8 +51,8 @@ npm start
 sudo dnf install -y nodejs npm git gcc-c++ make cmake python3
 
 # 2. Clone repository
-git clone https://github.com/litert-community/autonomous-edge-agent.git
-cd autonomous-edge-agent
+git clone https://github.com/abdulraheemnohri/Autonomous-Self-Growing-Edge-AI-Agent.git
+cd Autonomous-Self-Growing-Edge-AI-Agent
 npm install
 
 # 3. Build & Run
@@ -87,7 +87,7 @@ After=network.target
 [Service]
 Type=simple
 User=root
-WorkingDirectory=/opt/autonomous-edge-agent
+WorkingDirectory=/opt/Autonomous-Self-Growing-Edge-AI-Agent
 ExecStart=/usr/bin/npm start
 Restart=on-failure
 Environment=NODE_ENV=production

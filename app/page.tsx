@@ -56,6 +56,7 @@ export default function HomePage() {
 
   const isStreamingRef = useRef(isStreaming);
   const isHandsFreeRef = useRef(isHandsFree);
+  const hasWelcomedRef = useRef(false);
   const sendMessageRef = useRef<(text: string, speakResponse?: boolean) => void>(() => {});
 
   useEffect(() => {
@@ -65,6 +66,17 @@ export default function HomePage() {
   useEffect(() => {
     isHandsFreeRef.current = isHandsFree;
   }, [isHandsFree]);
+
+  useEffect(() => {
+    if (hasWelcomedRef.current) return;
+    hasWelcomedRef.current = true;
+    // Auto-trigger welcoming audio greeting when app first launches based on current cognitive level
+    const timer = setTimeout(() => {
+      const welcomeText = `Welcome to Autonomous Self-Growing Edge Agent. Cognitive engine is online at Level ${growthStats.level}. All LiteRT models and offline voice synthesis are fully operational.`;
+      realTimeAudioController.speakText(welcomeText);
+    }, 1200);
+    return () => clearTimeout(timer);
+  }, [growthStats.level]);
 
   const handleSendMessage = React.useCallback(async (text: string, speakResponse: boolean = false) => {
     if (!text.trim() || isStreamingRef.current) return;

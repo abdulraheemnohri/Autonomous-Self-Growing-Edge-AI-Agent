@@ -62,7 +62,7 @@ export class SettingsManager {
   }
 
   public getSettings(): AppSettings {
-    return { ...this.currentSettings };
+    return this.currentSettings;
   }
 
   public updateSettings(partial: Partial<AppSettings>): AppSettings {
